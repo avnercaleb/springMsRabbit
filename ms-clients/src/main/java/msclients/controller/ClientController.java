@@ -5,6 +5,7 @@ import msclients.service.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.persistence.EntityNotFoundException;
@@ -16,10 +17,14 @@ public class ClientController {
     @Autowired
     private ClientService service;
     @PostMapping
-    public ResponseEntity<Client> createClient(@RequestBody Client client, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity createClient(@RequestBody Client client, UriComponentsBuilder uriBuilder) {
         Client c = service.createClient(client);
-        URI uri = uriBuilder.path("'/clients/{id}").buildAndExpand(c.getId()).toUri();
-        return ResponseEntity.created(uri).body(c);
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .query("cpf={cpf}")
+                .buildAndExpand(c.getCpf())
+                .toUri();
+        return ResponseEntity.created(uri).build();
     }
 
     @GetMapping("/{cpf}")
